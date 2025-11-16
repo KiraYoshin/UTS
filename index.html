@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UTS — 50-Item Quiz (Dark Mode)</title>
+
+<style>
+  :root {
+    --bg: #0d0f14;
+    --card: #151821;
+    --accent: #1e90ff;
+    --accent-glow: 0 0 12px #1e90ff;
+    --text: #e9ecf2;
+    --wrong: #ff3b3b;
+    --correct: #3bff62;
+    --radius: 10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 24px;
+  }
+
+  .wrap {
+    max-width: 950px;
+    margin: auto;
+    padding: 30px;
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.65);
+    border: 1px solid #232734;
+  }
+
+  h1 {
+    text-align: center;
+    color: var(--accent);
+    text-shadow: var(--accent-glow);
+  }
+
+  .q {
+    background: #1b1f2b;
+    padding: 16px;
+    margin-bottom: 14px;
+    border-radius: var(--radius);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.45);
+    border-left: 3px solid var(--accent);
+    transition: 0.2s;
+  }
+
+  .q:hover {
+    transform: translateX(4px);
+    box-shadow: 0 0 15px #1e90ff55;
+  }
+
+  .choices label {
+    display: block;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+
+  input[type="radio"] {
+    accent-color: var(--accent);
+    transform: scale(1.2);
+    margin-right: 6px;
+    cursor: pointer;
+  }
+
+  button {
+    padding: 12px 20px;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    margin-right: 10px;
+    margin-top: 12px;
+    text-shadow: var(--accent-glow);
+    box-shadow: var(--accent-glow);
+    transition: 0.2s;
+  }
+
+  button:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 15px #1e90ff;
+  }
+
+  #result {
+    margin-top: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--accent);
+    text-shadow: var(--accent-glow);
+  }
+
+  .correct {
+    color: var(--correct);
+    font-weight: bold;
+  }
+
+  .wrong {
+    color: var(--wrong);
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>UTS — 50-Item Quiz</h1>
+
+  <form id="quiz"></form>
+
+  <button id="submitBtn" type="button">Submit Quiz</button>
+  <button id="showKeyBtn" type="button">Show Answer Key</button>
+
+  <div id="result"></div>
+  <div id="answers"></div>
+</div>
+
+<script>
+/* ---------------------------------------------------------
+   ALL 50 QUESTIONS
+--------------------------------------------------------- */
+const questions = [
+{q:"The process of learning and becoming aware of one's true potential and motives is called:", choices:["Self-awareness","Self-discovery","Self-identity","Self-esteem"], correct:1},
+{q:"Self-awareness refers to:", choices:["How you behave in society","Knowledge of yourself and your worth","Social expectations","Personality traits only"], correct:1},
+{q:"In S.E.L.F., your traits come from Social, Environmental, and ______ factors.", choices:["Life","Learning","Lifestyle","Local"], correct:0},
+{q:"Nature refers to traits influenced by:", choices:["Culture","Environment","Genetics and hormones","Personal beliefs"], correct:2},
+{q:"Nurture includes:", choices:["Biological traits","Early experiences and social relationships","DNA coding","Instincts"], correct:1},
+{q:"Philosophy means 'loving knowledge,' from Greek words Philo + ______.", choices:["Logos","Techne","Praxis","Sophia"], correct:3},
+{q:"Empiricism states that knowledge comes from:", choices:["Inner reason","Innate ideas","Divine revelation","Sense experience"], correct:3},
+{q:"'The unexamined life is not worth living' was stated by:", choices:["Plato","Aristotle","Socrates","Descartes"], correct:2},
+{q:"Plato divides the soul into Reason, Will, and ______.", choices:["Imagination","Emotion","Physical Appetite","Spirituality"], correct:2},
+{q:"'I think, therefore I am' was introduced by:", choices:["Hume","Descartes","Kant","Locke"], correct:1},
+{q:"Which philosopher rejected the idea of a permanent self?", choices:["Hume","Kant","Socrrates","Plato"], correct:0},
+{q:"Gilbert Ryle described the self as:", choices:["A bundle of perceptions","The soul","Behavior","Rational essence"], correct:2},
+{q:"According to Mead, the socialized aspect of the self is the:", choices:["I","Me","Ego","Persona"], correct:1},
+{q:"The first and most influential agent of socialization is:", choices:["Friends","School","Family","Community"], correct:2},
+{q:"Cooley’s Looking-Glass Self includes imagining others' ______.", choices:["Future","Judgment","Feelings","Actions"], correct:1},
+{q:"Psychology is the study of behavior and ______.", choices:["Culture","Society","Mental processes","Human nature"], correct:2},
+{q:"William James’ Me-Self includes the Material, Social, and ______ Self.", choices:["Virtual","Spiritual","Political","Cognitive"], correct:1},
+{q:"According to Carl Rogers, congruence occurs when:", choices:["Real self = Ideal self","Real self ≠ Ideal self","Ego dominates","Self-esteem is low"], correct:0},
+{q:"Western thought emphasizes:", choices:["Collectivism","Harmony","Individualism","Interconnectedness"], correct:2},
+{q:"In Hinduism, Atman refers to the:", choices:["Illusion","Body","Soul","Karma"], correct:2},
+{q:"Heredity is the transmission of traits through:", choices:["Culture","Environment","Genes","Education"], correct:2},
+{q:"Phenotype refers to:", choices:["Genetic code","Unobservable traits","Visible characteristics","Childhood experiences"], correct:2},
+{q:"Anorexia involves:", choices:["Excessive eating","Purging","Refusing to eat","Over-exercising"], correct:2},
+{q:"The phase of sexual response where orgasm occurs is:", choices:["Plateau","Excitement","Resolution","Climax"], correct:3},
+{q:"HIV can be transmitted through:", choices:["Touching","Sharing clothes","Anal/vaginal/oral sex","Mosquito bites"], correct:2},
+{q:"Responsible sexual behavior includes:", choices:["Acting on emotions","Risky exploration","Being future-oriented","Ignoring consequences"], correct:2},
+{q:"Birth spacing ideally ranges from:", choices:["1–2 years","2–3 years","3–5 years","5–7 years"], correct:2},
+{q:"Utility refers to:", choices:["Symbolic meaning","Emotional value","Practical purpose","Social identity"], correct:2},
+{q:"William James’ material self includes body, clothes, home, and:", choices:["Religion","Immediate family","Memories","Skills"], correct:1},
+{q:"Wants are described as:", choices:["Basic needs","Changing desires","Unchanging needs","Responsibilities"], correct:1},
+{q:"Spirituality comes from spiritus meaning:", choices:["Faith","Light","Breath/life force","Sacred"], correct:2},
+{q:"In Islam, the pilgrimage to Mecca is called:", choices:["Salat","Sawm","Hajj","Zakat"], correct:2},
+{q:"Affinity with nature refers to:", choices:["Fear","Rejecting nature","Connection with nature","Destroying nature"], correct:2},
+{q:"RA 10354 promotes:", choices:["Divorce","Reproductive health services","Adoption","Tax reduction"], correct:1},
+{q:"Politics comes from politika meaning:", choices:["City laws","Affairs of cities","Citizen’s power","Social identity"], correct:1},
+{q:"'Man is a political animal' was said by:", choices:["Plato","Aristotle","Kant","Socrates"], correct:1},
+{q:"Jus sanguinis means citizenship based on:", choices:["Birthplace","Residence","Bloodline","Marriage"], correct:2},
+{q:"Human rights are:", choices:["Optional","Universal","Selective","Exclusive"], correct:1},
+{q:"Organized violence includes:", choices:["War","Bullying","Domestic abuse","Scolding"], correct:0},
+{q:"Personal peace means:", choices:["Avoiding people","Inner harmony","National unity","Silence"], correct:1},
+{q:"Digital natives include:", choices:["Born before 1980","Millennials & Gen Z","Boomers","Seniors"], correct:1},
+{q:"Online disinhibition includes:", choices:["More polite","More reserved","Loosening restraints","Avoiding internet"], correct:2},
+{q:"Toxic disinhibition involves:", choices:["Self-disclosure","Threats/rudeness","Empathy","Kindness"], correct:1},
+{q:"Digital etiquette refers to:", choices:["Buying online","Online behavior rules","Digital health","Password security"], correct:1},
+{q:"Learning is defined as a permanent change in:", choices:["Feelings","Behavior","Height","Personality"], correct:1},
+{q:"Self-regulated learners use:", choices:["Luck","Metacognitive strategies","Peer pressure","Guessing"], correct:1},
+{q:"A fixed mindset believes abilities are:", choices:["Changeable","Improved by effort","Set in stone","Environment-made"], correct:2},
+{q:"Self-efficacy means belief in one’s:", choices:["Friends","Power to succeed","Strength","Social skills"], correct:1},
+{q:"Goals must consider:", choices:["Motivation","Task complexity","Rewards","Environment"], correct:1},
+{q:"Eustress is:", choices:["Harmful","Neutral","Positive and motivating","Chronic"], correct:2},
+];
+
+/* ---------------------------------------------------------
+   Build Quiz
+--------------------------------------------------------- */
+const quiz = document.getElementById("quiz");
+
+questions.forEach((item, idx) => {
+  const div = document.createElement("div");
+  div.className = "q";
+
+  div.innerHTML = `<strong>${idx+1}. ${item.q}</strong><br><br>`;
+
+  item.choices.forEach((c, i) => {
+    div.innerHTML += `
+      <label>
+        <input type="radio" name="q${idx}" value="${i}">
+        ${String.fromCharCode(65 + i)}. ${c}
+      </label><br>`;
+  });
+
+  quiz.appendChild(div);
+});
+
+/* ---------------------------------------------------------
+   Submit
+--------------------------------------------------------- */
+document.getElementById("submitBtn").addEventListener("click", () => {
+  let score = 0;
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  questions.forEach((item, idx) => {
+    const selected = document.querySelector(`input[name=q${idx}]:checked`);
+    const ans = selected ? parseInt(selected.value) : null;
+
+    if (ans === item.correct) score++;
+
+    const resultItem = document.createElement("div");
+    resultItem.innerHTML =
+      `<strong>${idx+1}.</strong> Your answer: ` +
+      `<span class="${ans===item.correct?'correct':'wrong'}">` +
+      `${ans===null?'No answer':String.fromCharCode(65+ans)}</span> — ` +
+      `Correct: <span class="correct">${String.fromCharCode(65+item.correct)}</span>`;
+    answersDiv.appendChild(resultItem);
+  });
+
+  document.getElementById("result").innerHTML =
+    `Score: ${score} / ${questions.length}`;
+});
+
+/* ---------------------------------------------------------
+   Show Answer Key
+--------------------------------------------------------- */
+document.getElementById("showKeyBtn").addEventListener("click", () => {
+  let key = "";
+  questions.forEach((q, i) => {
+    key += `${i+1}. ${String.fromCharCode(65+q.correct)}\n`;
+  });
+  alert(key);
+});
+</script>
+
+</body>
+</html>
